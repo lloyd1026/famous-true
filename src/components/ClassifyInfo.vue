@@ -79,7 +79,8 @@ export default {
                 }
             }
         },
-
+        
+        
         getClassifyInfo() {
             this.$axios.get(this.$httpUrl + '/getClassifyInfo').then(res => res.data).then(res => {
                 this.data = res.data
@@ -155,6 +156,7 @@ export default {
     },
 }
 </script>
+
 
 <style scoped>
 .custom-tree-node {
