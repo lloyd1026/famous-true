@@ -9,7 +9,8 @@ import store from "./store"
 import * as echarts from 'echarts'
 
 Vue.config.productionTip = false
-Vue.prototype.$httpUrl='http://47.104.4.216:5000'
+// Vue.prototype.$httpUrl='http://47.104.4.216:5000'
+Vue.prototype.$httpUrl = '/api'
 Vue.prototype.$axios = axios
 Vue.prototype.$echarts = echarts
 
