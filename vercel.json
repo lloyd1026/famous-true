@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "http://47.104.4.216:5000/$1"
+    },
+    {
+      "source": "/",
+      "destination": "/HomePage"
     }
   ]
 }
