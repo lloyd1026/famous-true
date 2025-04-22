@@ -7,10 +7,10 @@
                     添加古树
                     <i class="el-icon-circle-plus-outline el-icon--right"></i>
                 </el-button>
-                <el-button type="danger" style="margin-right: 10px; height: 40px;" @click="batchDelete">
+                <!-- <el-button type="danger" style="margin-right: 10px; height: 40px;" @click="batchDelete">
                     批量删除
                     <i class="el-icon-delete el-icon--right"></i>
-                </el-button>
+                </el-button> -->
 
                 <el-form-item>
                     <el-input placeholder="古树名" v-model.trim="treeName"
@@ -84,12 +84,13 @@
             </div>
         </div>
 
+        <!-- 编辑（显示/隐藏） handle edit 控制-->
         <el-drawer :title="curTree.name" :before-close="handleClose" :visible.sync="dialog" custom-class="demo-drawer"
             :size="700" ref="drawer">
             <div class="demo-drawer__content">
                 <el-form :model="curTree">
                     <el-form-item label="古树名" :label-width="formLabelWidth">
-                        <el-input v-model="curTree.name" autocomplete="off" style="width: 250px;"></el-input>
+                        <el-input v-model="curTree.name" autocomplete="off" style="width: 250px;" disabled></el-input>
                     </el-form-item>
 
                     <el-form-item label="学名" :label-width="formLabelWidth">
@@ -102,7 +103,9 @@
                         <el-input v-model="curTree.diameter" autocomplete="off" style="width: 250px;"></el-input>
                     </el-form-item>
                     <el-form-item label="地区" :label-width="formLabelWidth">
-                        <el-input v-model="curTree.place" autocomplete="off" style="width: 250px;"></el-input>
+                        <el-select v-model="curTree.place" placeholder="请选择地区" style="width: 250px;">
+                            <el-option v-for="item in placeList" :key="item" :label="item" :value="item"></el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="位置" :label-width="formLabelWidth">
                         <el-input v-model="curTree.detailedLocation" autocomplete="off"
@@ -116,7 +119,7 @@
                             v-model="curTreeClassifyInfo[1]" style="width: 250px; margin-right: 10px;"
                             clearable></el-cascader>
                     </el-form-item>
-
+                    
                     <el-form-item label="历史传说/文化故事" :label-width="formLabelWidth">
                         <el-input type="textarea" :autosize="{ minRows: 2 }" placeholder="请输入内容"
                             v-model="curTree.description">
@@ -141,10 +144,12 @@
         </el-drawer>
 
 
-
         <el-dialog title="古树图片" :visible.sync="dialogTreeImgVisible" append-to-body>
-            <el-upload action="#" list-type="picture-card" :auto-upload="false" :on-change="handleChangeImg"
-                :file-list="treeImg">
+            <el-upload action="#" 
+            list-type="picture-card" 
+            :auto-upload="false" 
+            :on-change="(file) => handleChangeImg(file, 'tree')"
+            :file-list="treeImg">
                 <i slot="default" class="el-icon-plus"></i>
                 <div slot="file" slot-scope="{file}">
                     <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
@@ -157,7 +162,7 @@
                             <i class="el-icon-download"></i>
                         </span>
 
-                        <span class="el-upload-list__item-delete" @click="handleRemoveTreeImg(file)">
+                        <span class="el-upload-list__item-delete" @click="handleRemoveImg(file)">
                             <i class="el-icon-delete"></i>
                         </span>
                     </span>
@@ -176,8 +181,11 @@
         </el-dialog>
 
         <el-dialog title="古树生长位置图片" :visible.sync="dialogPlaceImgVisible" append-to-body>
-            <el-upload action="#" list-type="picture-card" :auto-upload="false" :on-change="handleChangeImg"
-                :file-list="placeImg">
+            <el-upload action="#" 
+            list-type="picture-card" 
+            :auto-upload="false" 
+            :on-change="(file) => handleChangeImg(file, 'place')" 
+            :file-list="placeImg">
                 <i slot="default" class="el-icon-plus"></i>
                 <div slot="file" slot-scope="{file}">
                     <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
@@ -190,7 +198,7 @@
                             <i class="el-icon-download"></i>
                         </span>
 
-                        <span class="el-upload-list__item-delete" @click="handleRemovePlaceImg(file)">
+                        <span class="el-upload-list__item-delete" @click="handleRemoveImg(file)">
                             <i class="el-icon-delete"></i>
                         </span>
 
@@ -209,7 +217,7 @@
             </div>
         </el-dialog>
 
-
+        <!-- addTree 添加古树（显示/隐藏） -->
         <el-dialog title="添加古树" :visible.sync="addTreeDialogVisible" append-to-body>
             <el-form :model="addTreeForm">
                 <el-form-item label="古树名" :label-width="formLabelWidth">
@@ -253,6 +261,7 @@
                 <el-form-item label="古树图片" :label-width="formLabelWidth">
                     <el-button type="text" @click="dialogTreeImgVisible = true">添加图片</el-button>
                 </el-form-item>
+                
             </el-form>
             <div class="demo-drawer__footer" style="text-align: center;">
                 <el-button @click="cancelAddTree()">取 消</el-button>
@@ -269,7 +278,7 @@
 <script>
 
 export default {
-    name: 'TreeInfo',
+    name: 'TreeInfo', // 定义的组件名
     components: {},
     data() {
         return {
@@ -285,7 +294,7 @@ export default {
             selectedRows: [],
             classifyInfo: [],
             selectedClassifyOptions: [],
-            placeList: ["北京市", "天津市", "河北省"],
+            placeList: [], //this.placeList,
             place: '',
             dialog: false,
             formLabelWidth: '150px',
@@ -306,7 +315,11 @@ export default {
             placeImg: [],                    //生长位置图片
             IMGdisabled: true,
 
+            // 新增全局变量
+            uploadTreeImage: [],
+            uploadPlaceImage: [],
             addTreeDialogVisible: false,
+            // 上传新树的图片
             addTreeForm: {
                 name: '',
                 scientificName: '',
@@ -316,7 +329,8 @@ export default {
                 detailedLocation: '',
                 curTreeClassifyInfo: [],
                 description: '',
-
+                treeImg: [],
+                placeImg: []
             }
         }
     },
@@ -350,11 +364,9 @@ export default {
                 }
                 var treeImg = []
                 var len1 = this.curTree.treeImg.length
-                // console.log("111img",this.curTree.treeImg)
                 for (var index = 0; index < len1; index++) {
                     treeImg.push({ name: index, url: this.curTree.treeImg[index] })
                 }
-                // console.log("treeImg",treeImg)
                 this.treeImg = treeImg
 
                 var placeImg = []
@@ -362,62 +374,85 @@ export default {
                 for (var index2 = 0; index2 < len2; index2++) {
                     placeImg.push({ name: index2, url: this.curTree.placeImg[index2] })
                 }
-                // console.log("placeImg",placeImg)
                 this.placeImg = placeImg
-
-
-                // console.log(this.curtreeImg)
             }
 
         }
     },
-    computed: {
-        // curTreeClassifyInfo() {
-        //     if(this.curTree != null){
-        //         var res = [];
-        //         var len = this.curTree.fid.length
-        //         for(var i=0;i<len;i++){
-        //             res.push([this.curTree.fid[i],this.curTree.gid[i],this.curTree.sid[i]]);
-        //         }
-        //         return res;
-        //     } else{
-        //         return []
-        //     }
-        // }
-    },
     methods: {
+        // 编辑保存
         save(){
-            this.dialog = false
-            this.$message.success("修改成功")
+            // 确保表单已填写完整
+            if (
+                this.curTree.name.trim() == "" || 
+                this.curTree.scientificName.trim() == "" || 
+                (typeof this.curTree.diameter === 'string' && this.curTree.diameter.trim() == "") || // 只对字符串使用 trim
+                (typeof this.curTree.height === 'string' && this.curTree.height.trim() == "") || // 只对字符串使用 trim
+                this.curTree.description.trim() == "" || 
+                this.curTree.place.trim() == ""
+            ) {
+                this.$message.error("古树信息未填写完整");
+                return;
+            }
+    
+            // 构造提交的数据
+            const treeData = {
+                name: this.curTree.name.trim(),
+                scientificName: this.curTree.scientificName.trim(),
+                height: parseFloat(this.curTree.height),
+                diameter: parseFloat(this.curTree.diameter),
+                place: this.curTree.place.trim(),
+                detailedLocation: this.curTree.detailedLocation.trim(),
+                description: this.curTree.description.trim(),
+                sid: this.curTreeClassifyInfo[0]?.[2], 
+                treeImg: this.curTree.treeImg, // 假设图片字段存在
+                placeImg: this.curTree.placeImg // 假设图片字段存在
+            };
+
+            // 发起更新请求到后端
+            this.$axios.post(this.$httpUrl + '/updateTree', treeData)
+                .then(response => {
+                    // 处理返回的结果
+                    if (response.data.success) {
+                        this.$message.success("古树信息更新成功");
+                        this.dialog = false; // 关闭编辑框
+                    } else {
+                        this.$message.error("更新失败，请重试");
+                    }
+                })
+                .catch(error => {
+                    this.$message.error("请求失败，出现错误：" + error.message);
+                });
         },
+        // OK
         getClassifyInfo() {
             this.$axios.get(this.$httpUrl + '/getClassifyInfo').then(res => res.data).then(res => {
                 this.classifyInfo = res.data
-                console.log("classifyInfo", res.data)
+                // console.log("classifyInfo", res.data)
             })
         },
+        // OK
         getAllTree() {
             this.$axios.get(this.$httpUrl + '/getAllTree').then(res => res.data).then(res => {
-                // console.log("res.data", res.data)
                 this.treeInfo = res.data
-                // console.log("treeInfo", this.treeInfo)
+                // console.log("treeInfo:", this.treeInfo);
                 this.total = this.treeInfo.length
                 this.groupedTreeInfo = this.treeInfo.slice((this.pageNum - 1) * this.pageSize, this.pageNum * this.pageSize)
-                // console.log("this.groupedTreeInfo",this.groupedTreeInfo)
             })
         },
+        // 没有用到
         getTreeByName() {
             this.$axios.post(this.$httpUrl + '/getTreeByName', { name: this.name }).then(res => res.data).then(res => {
                 console.log(res)
             })
         },
+
         load() {
             this.groupedTreeInfo = this.treeInfo.slice((this.pageNum - 1) * this.pageSize, this.pageNum * this.pageSize)
 
         },
         //每页数量发生变化
         handleSizeChange(pageSize) {
-            // console.log("pageSize=", pageSize)
             this.pageSize = pageSize;
             this.pageNum = 1
             this.load()
@@ -429,43 +464,28 @@ export default {
         },
         //编辑古树信息
         handleEdit(row) {
-            // console.log(row)
             this.dialog = true;
+            // 组件传入当前选中的树的信息
             this.curTree = row;
-            console.log("this.curTree", this.curTree)
-            // this.curRow = row;
-            // this.radio = row.publishStatus;
+            // console.log("this.curTree", this.curTree)
         },
         //删除古树信息
         handleDelete(row) {  //参数为古树Id
-            if (row.species.length > 0 || row.place.length > 0) {
-                this.$message.error('请先删除名木古树的生物分类和名木古树的生长地区');
-                return;
-            }
-
+            // if (row.species.length > 0 || row.place.length > 0) {
+            //     this.$message.error('请先删除名木古树的生物分类和名木古树的生长地区');
+            //     return;
+            // }
             this.$axios.post(this.$httpUrl + '/deleteTree', {
                 "tid": row.id
             }).then(res => res.data).then(res => {
+                this.$message.info("删除成功");
+                this.$router.go(0);  // 刷新当前页面
                 console.log(res)
-                // if (res.data.length == 0) {
-                //     this.$message({
-                //         showClose: true,
-                //         message: '未找到符合条件的古树'
-                //     });
-                //     return;
-                // } else {
-                //     this.treeInfo = res.data
-                //     // console.log("treeinfo",this.treeInfo)
-                // }
             })
         },
         //批量删除的多选项发生变化
         handleSelectionChange(selection) {
             this.selectedRows = selection;
-        },
-        //批量删除
-        batchDelete() {
-
         },
         //添加古树
         addTree() {
@@ -487,16 +507,58 @@ export default {
             }
             this.addTreeForm = addTreeForm
         },
+        // add 古树保存
         saveTree(){
-            if(this.addTreeForm.name.trim() == "" || this.addTreeForm.scientificName.trim() == "" ||this.addTreeForm.diameter.trim() == "" ||this.addTreeForm.height.trim() == "" || this.addTreeForm.description.trim() == "" || this.addTreeForm.place.trim() == ""){
-                this.$message.error("古树信息未填写完整")
-                return
+            // 基本校验
+            console.log("this.addTreeForm.placeImg", this.addTreeForm.placeImg);
+            console.log("this.addTreeForm.treeImg", this.addTreeForm.treeImg);
+            if (
+                this.addTreeForm.name.trim() === "" ||
+                this.addTreeForm.scientificName.trim() === "" ||
+                (typeof this.addTreeForm.height === 'string' && this.addTreeForm.height.trim() === "") ||
+                (typeof this.addTreeForm.diameter === 'string' && this.addTreeForm.diameter.trim() === "") ||
+                this.addTreeForm.description.trim() === "" ||
+                this.addTreeForm.place.trim() === "" || this.addTreeForm.placeImg.length === 0 || 
+                this.addTreeForm.treeImg === 0
+            ) {
+                this.$message.error("古树信息未填写完整");
+                return;
             }
-            console.log(this.addTreeForm)
-            this.$message.success("添加成功")
-            this.addTreeDialogVisible = false
+
+            // 构造提交数据
+            const treeData = {
+                name: this.addTreeForm.name.trim(),
+                scientificName: this.addTreeForm.scientificName.trim(),
+                height: parseFloat(this.addTreeForm.height),
+                diameter: parseFloat(this.addTreeForm.diameter),
+                place: this.addTreeForm.place.trim(),
+                detailedLocation: this.addTreeForm.detailedLocation.trim(),
+                description: this.addTreeForm.description.trim(),
+                sid: this.addTreeForm.curTreeClassifyInfo[2], // 种
+                placeImg: this.addTreeForm.placeImg,   // ✅ 生长位置图片 Base64
+                treeImg: this.addTreeForm.treeImg,
+            };
+            
+            // 调用后端 API
+            this.$axios.post(this.$httpUrl + '/addTree', treeData)
+                .then(res => res.data)
+                .then(res => {
+                    console.log("添加返回结果:", res);
+                    if (res.success) {
+                        this.$message.success("古树添加成功");
+                        this.addTreeDialogVisible = false;
+                        this.getAllTree(); // 刷新表格
+                        this.cancelAddTree(); // 重置表单
+                    } else {
+                        this.$message.error(res.message || "添加失败");
+                    }
+                })
+                .catch(err => {
+                    this.$message.error("网络错误");
+                    console.error(err);
+                });
         },
-        //
+
         cancelForm(done) {
             this.$confirm('确认取消修改？')
                 .then(() => {
@@ -506,24 +568,103 @@ export default {
                 .then(() => {
                     this.dialog = false
                 })
-
         },
         //关闭修改对话框
         handleClose(done) {
             done();
         },
-        //更新古树图片
-        updateImg() {
-
+        // 图片变化
+        handleChangeImg(file, type) {
+            if( type === "tree") {
+                this.uploadTreeImage.push(file.raw);
+                console.log("final tree upload Image:", this.uploadTreeImage);
+            } else if (type === "place"){
+                this.uploadPlaceImage.push(file.raw);
+                console.log("final place upload Image:", this.uploadPlaceImage);
+            } else {
+                console.log("error")
+            }
         },
-        handleChangeImg() {
-
-        },
+        // 保存图片（生长位置）
         savePlaceImg() {
-            this.dialogPlaceImgVisible = false
-        },
-        saveTreeImg() {
+            if (this.uploadPlaceImage.length === 0) {
+                this.$message.warning('请至少上传一张生长位置图片');
+                return;
+            }
 
+            if(this.addTreeDialogVisible && this.addTreeForm.name.trim() === '') {
+                this.$message.warning('请先填写新增古树名');
+                return;
+            }
+            
+            // 上传图片
+            const treeName = this.dialog ? this.curTree.name : this.addTreeForm.name;
+            console.log("treeName", treeName);
+
+            const formData = new FormData();
+            this.uploadPlaceImage.forEach(file => {
+                formData.append('files', file);  // 实际情况你可能要 file.raw
+            });
+
+            this.$axios.post(`${this.$httpUrl}/uploadImages`, formData, {
+                params: {
+                    treeName: treeName,
+                    type: 'place'
+                }
+            }).then((res) => {
+                this.$message.success('上传成功！');
+                this.uploadPlaceImage = [];
+
+                console.log(res.data.urls); // 就是你刚刚服务器生成好的图片路径数组
+                if(this.dialog) {
+                    // 编辑已有古树
+                    this.curTree.placeImg.push(...res.data.urls);
+                } else {
+                    this.addTreeForm.placeImg.push(...res.data.urls);
+                }
+            }).catch(err => {
+                console.error("上传失败：", err);
+                this.$message.error('上传失败');
+            });
+        },
+        // 保存图片（古树）
+        saveTreeImg() {
+            if (this.uploadTreeImage.length === 0) {
+                this.$message.warning('请至少上传一张古树图片');
+                return;
+            }
+
+            if(this.addTreeDialogVisible && this.addTreeForm.name.trim() === '') {
+                this.$message.warning('请先填写新增古树名');
+                return;
+            }
+
+            const treeName = this.dialog ? this.curTree.name : this.addTreeForm.name;
+
+            const formData = new FormData();
+            this.uploadTreeImage.forEach(file => {
+                formData.append('files', file);  // 如果只是 ObjectURL，要改成原始 file.raw
+            });
+
+            this.$axios.post(`${this.$httpUrl}/uploadImages`, formData, {
+                params: {
+                    treeName: treeName,
+                    type: 'tree'
+                }
+            }).then((res) => {
+                this.$message.success('古树图片上传成功！');
+
+                this.uploadTreeImage = [];
+                if(this.dialog) {
+                    // 编辑已有古树
+                    this.curTree.treeImg.push(...res.data.urls);
+                } else {
+                    this.addTreeForm.treeImg.push(...res.data.urls);
+                }
+            }).catch(err => {
+                console.error("上传失败：", err);
+                this.$message.error('古树图片上传失败');
+            });
         },
         // 预览古树图片
         handlePictureCardPreview(file) {
@@ -538,29 +679,38 @@ export default {
             this.dialogPlaceVisible = true;
         },
 
-        handleRemoveTreeImg(file) {
-            console.log("remove", file)
+        handleRemoveImg(file) {
+            console.log("remove", file.url)
             this.treeImg = this.treeImg.filter(item => {
                 return item.url != file.url
             })
-            // this.curtreeImg = this.curtreeImg.filter(item => item != file)
-        },
-        handleRemovePlaceImg(file) {
-            this.placeImg = this.placeImg.filter(item => {
-                return item.url != file.url
+            // 调用后端接口删除图片
+            this.$axios.post(this.$httpUrl + '/deleteImages', {
+                url: file.url,
+                tid: this.currentTreeId  // 如果你需要知道是哪棵树下的图片
+            }).then(() => {
+                this.$message.success("图片删除成功")
+            }).catch(err => {
+                this.$message.error("图片删除失败")
+                console.error(err)
             })
-            console.log("remove", file)
-
-            // this.curtreeImg = this.curtreeImg.filter(item => item != file)
         },
         handleDownload(file) {
             console.log(file)
+        },
+        // 获取地区信息 OK
+        getPlaceInfo() {
+            this.$axios.get(this.$httpUrl + '/getPlaceInfo').then(res => res.data).then(res => {
+                this.placeList = res.data.map(item => item.name);  // 只提取 name 字段
+                console.log("TreeInfo: ", this.placeList)
+            })
         },
         
     },
     created() {
         this.getAllTree()
         this.getClassifyInfo()
+        this.getPlaceInfo()
     }
 }
 </script>

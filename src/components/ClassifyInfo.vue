@@ -90,7 +90,6 @@ export default {
         },
 
         append(node) {
-
             this.$prompt('请输入名称', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -103,7 +102,25 @@ export default {
                 });
                 var name = value
                 var newChild = { value: -256, label: name, children: [] };
-                node.data.children.push(newChild);
+                // 调用后端 API 添加分类
+                this.$axios.post(this.$httpUrl + '/addCategory', {
+                    name: value,
+                    parentId: node.data.value,  
+                })
+                .then(res => {
+                    if (res.data.success) {
+                        // 后端添加成功后，更新前端树形结构
+                        node.data.children.push(newChild);  // 将新分类添加到当前父节点的 children 数组中
+                        this.$message.success('分类添加成功');
+                    } else {
+                        this.$message.error('添加失败');
+                    }
+                })
+                .catch(error => {
+                    this.$message.error('网络错误');
+                    console.error(error);
+                });
+                // node.data.children.push(newChild);
             }).catch(() => {
                 this.$message({
                     type: 'info',
@@ -113,31 +130,43 @@ export default {
 
 
         },
-        remove(node, data) {
-            console.log(node,data)
-            this.$message.error("当前分类下存在古树，无法删除");
-            return;
-            
-            // this.$confirm('确认删除该分类, 是否继续?', '提示', {
-            //     confirmButtonText: '确定',
-            //     cancelButtonText: '取消',
-            //     type: 'warning'
-            // }).then(() => {
-            //     const parent = node.parent;
-            //     const children = parent.data.children || parent.data;
-            //     const index = children.findIndex(d => d.value === data.value);
-            //     children.splice(index, 1);
-            //     this.$message({
-            //         type: 'success',
-            //         message: '删除成功!'
-            //     });
-            // }).catch(() => {
-            //     this.$message({
-            //         type: 'info',
-            //         message: '已取消删除'
-            //     });
-            // });
+        remove(node) {
+            const id = node.data.value;
+            const label = node.label;
+            let type = '';
 
+            if (label.endsWith('科')) type = 'Family';
+            else if (label.endsWith('属')) type = 'Genus';
+            else type = 'Species';
+
+            this.$confirm('确定删除该分类吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                this.$axios.post(this.$httpUrl + '/deleteCategory', {
+                    id: id,
+                    type: type
+                }).then(res => {
+                    if (res.data.success) {
+                        // 从 data 中移除节点
+                        const parent = node.parent;
+                        const children = parent.data.children || parent.childNodes;
+                        const index = children.findIndex(child => child.value === id);
+                        if (index > -1) {
+                            children.splice(index, 1);
+                        }
+                        this.$message.success('删除成功');
+                    } else {
+                        this.$message.error(res.data.msg || '删除失败');
+                    }
+                }).catch(err => {
+                    this.$message.error('网络错误');
+                    console.error(err);
+                });
+            }).catch(() => {
+                this.$message.info('已取消删除');
+            });
         },
         isProhibit(node) {
             const regex = /[\u4e00-\u9fa5]$/; // 匹配字符串中的最后一个汉字

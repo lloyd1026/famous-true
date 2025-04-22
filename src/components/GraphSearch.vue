@@ -122,42 +122,6 @@
             </el-carousel>
             
         </el-dialog>
-
-        <!-- <div v-for="tree in treeInfo" :key="tree.id" style="margin-bottom: 5px;">
-            <el-descriptions class="margin-top" :column="4" :size="size" border>
-                <el-descriptions-item>
-                    <template slot="label">
-                        树名
-                    </template>
-                    {{tree.name}}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                    <template slot="label">
-                        学名
-                    </template>
-                    {{tree.scientificName}}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                    <template slot="label">
-                        科属种
-                    </template>
-                    {{ tree.family[0] }}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                    <template slot="label">
-                        树高
-                    </template>
-                    {{ tree.height }}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                    <template slot="label">
-                        胸径
-                    </template>
-                    {{tree.diameter}}
-                </el-descriptions-item>
-            </el-descriptions>
-        </div> -->
-
     </div>
 </template>
 
