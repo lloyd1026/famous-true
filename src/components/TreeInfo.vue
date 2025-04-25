@@ -60,7 +60,7 @@
                     <template slot-scope="scope">
                         <div style="display: flex; align-items: center;">
                             <el-image v-if="scope.row.treeImg.length != 0"
-                                style="width: 100px; height: 100px; flex-shrink: 0;" :src="scope.row.treeImg[0]"
+                                style="width: 100px; height: 100px; flex-shrink: 0;" :src="$fixImgUrl(scope.row.treeImg[0])"
                                 fit="fill" lazy>
                             </el-image>
                         </div>
@@ -152,7 +152,7 @@
             :file-list="treeImg">
                 <i slot="default" class="el-icon-plus"></i>
                 <div slot="file" slot-scope="{file}">
-                    <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
+                    <img class="el-upload-list__item-thumbnail" :src="$fixImgUrl(file.url)" alt="">
                     <span class="el-upload-list__item-actions">
                         <span class="el-upload-list__item-preview" @click="handlePictureCardPreview(file)">
                             <i class="el-icon-zoom-in"></i>
@@ -169,9 +169,9 @@
                 </div>
             </el-upload>
 
-            <!-- 图片预览框 -->
+            <!-- 图片预览框 点击放大按钮-->
             <el-dialog :visible.sync="dialogPreviewVisible" append-to-body>
-                <img width="100%" :src="previewImageUrl" alt="" />
+                <img width="100%" :src="$fixImgUrl(previewImageUrl)" alt="" />
             </el-dialog>
 
             <div slot="footer" class="dialog-footer">
@@ -188,7 +188,7 @@
             :file-list="placeImg">
                 <i slot="default" class="el-icon-plus"></i>
                 <div slot="file" slot-scope="{file}">
-                    <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
+                    <img class="el-upload-list__item-thumbnail" :src="$fixImgUrl(file.url)" alt="">
                     <span class="el-upload-list__item-actions">
                         <span class="el-upload-list__item-preview" @click="handlePlacePictureCardPreview(file)">
                             <i class="el-icon-zoom-in"></i>
@@ -208,7 +208,7 @@
 
             <!-- 图片预览框 -->
             <el-dialog :visible.sync="dialogPlaceVisible" append-to-body>
-                <img width="100%" :src="placepreviewImageUrl" alt="" />
+                <img width="100%" :src="$fixImgUrl(placepreviewImageUrl)" alt="" />
             </el-dialog>
 
             <div slot="footer" class="dialog-footer">
@@ -676,6 +676,7 @@ export default {
         handlePlacePictureCardPreview(file) {
             // console.log("prefile.url",file.url)
             this.placepreviewImageUrl = file.url;
+            console.log("预览生长图片：", this.placepreviewImageUrl );
             this.dialogPlaceVisible = true;
         },
 

@@ -117,7 +117,7 @@
             </el-descriptions>
             <el-carousel :interval="4000" type="card" height="300px">
                 <el-carousel-item v-for="(img,index) in detailTree.img" :key="index">
-                    <el-image  :src="img"></el-image>
+                    <el-image  :src="$fixImgUrl(img)"></el-image>
                 </el-carousel-item>
             </el-carousel>
             

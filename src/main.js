@@ -9,11 +9,17 @@ import store from "./store"
 import * as echarts from 'echarts'
 
 Vue.config.productionTip = false
-// Vue.prototype.$httpUrl='http://localhost:5000'
-Vue.prototype.$httpUrl='http://47.104.4.216:5000'
-Vue.prototype.$httpUrl = '/api'
+// Vue.prototype.$httpUrl='http://localhost:5000'  // 本地
+// Vue.prototype.$httpUrl='http://47.104.4.216:5000'  // 服务器 + 前端 本地
+Vue.prototype.$httpUrl = '/api'                 // 全部署
 Vue.prototype.$axios = axios
 Vue.prototype.$echarts = echarts
+
+Vue.prototype.$fixImgUrl = function (url) {
+  return url
+    .replace('http://localhost:5000', 'https://famous-tree.top')
+    .replace('http://47.104.4.216:5000', 'https://famous-tree.top');
+}
 
 
 Vue.use(VueRouter)
